@@ -4,7 +4,7 @@ import App from './App';
 import "./index.css";
 import reportWebVitals from './reportWebVitals';
 import { QueryClientProvider } from 'react-query';
-import "./firebase";
+// import "./firebase";
 import { queryClient } from './queryClient';
 
 ReactDOM.render(

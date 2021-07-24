@@ -70,7 +70,7 @@ export const Chat: React.FC<ChatProps> = ({
         <>
             <div className="w-screen px-5 flex flex-row items-center justify-between border-solid border-b-2 border-blue-100">
                 <a className="bg-gray-200 p-2 rounded hover:bg-gray-300 cursor-pointer" onClick={onBackPress}>⬅️ Back</a>
-                <h1 className="text-lg ml-5 font-bold font-mono my-5">🔥 firestore chat 💬 </h1>
+                <h1 className="text-lg ml-5 font-bold font-mono my-5">🔥 Help Me 💬 </h1>
             </div>
             <div className="w-screen flex-1 flex flex-col-reverse overflow-auto px-10">
                 {

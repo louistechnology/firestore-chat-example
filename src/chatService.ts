@@ -1,8 +1,10 @@
-import firebase from "firebase";
 import { InfiniteData, MutationFunction, QueryFunction, QueryKey } from "react-query"
-import { db } from "./firebase"
 import { queryClient } from "./queryClient";
 
+import { io } from "socket.io-client";
+const socket = io("http://localhost:3000");
+
+socket.connect();
 export interface ChatMessage {
     text: string;
     username: string;
@@ -13,13 +15,35 @@ export interface ChatMessage {
 
 const PER_PAGE = 20;
 
+let allMessages: ChatMessage[] = [
+    {
+        roomId:"1",
+        username:"11",
+        text:"hello from 11",
+        createdAt: new Date()
+    },
+    {
+        roomId:"1",
+        username:"22",
+        text:"hello from 22",
+        createdAt: new Date()
+    }
+]
+
 const sendMessage: MutationFunction<any, ChatMessage> = async (message) => {
-    const docRef = db.collection(`Chats/${message.roomId}/messages`).doc();
-    await docRef.set({
-        ...message,
-        id: docRef.id,
-        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-    });
+    console.log(`sendMessage: ${message}`);
+    console.log(message);
+
+    // socket.emit('NEW_MESSAGE', {
+    //     sender: message.username,
+    //     roomId: message.roomId,
+    //     content: message.text
+    // })
+
+    // allMessages.push(message);
+    // This supposed to triggered on receive
+    // const key = ["messages", message.roomId];
+    // addMessageToQueryCache(key, message);
 }
 
 const getMessages: QueryFunction<ChatMessage[]> = async (key) => {
@@ -28,36 +52,24 @@ const getMessages: QueryFunction<ChatMessage[]> = async (key) => {
     if (key.pageParam) {
         date = key.pageParam;
     }
-
-    const snapshot = await db.collection(`Chats/${roomId}/messages`).orderBy("createdAt", "desc").where("createdAt", "<", date).limit(PER_PAGE).get();
-    const retMessage: ChatMessage[] = []
-    for (const message of snapshot.docs) {
-        const data = message.data() as any;
-        retMessage.push({ ...data, createdAt: data.createdAt.toDate() })
-    }
-    return retMessage;
+    return allMessages;
 }
 
 const hasMessageBefore = async (roomId: string, date?: Date) => {
     if (!date) {
         return false;
     }
-    const data = await db.collection(`Chats/${roomId}/messages`).orderBy("createdAt", "desc").where("createdAt", "<", date).limit(1).get()
-    return !!data.docs.length;
+    // const data = await db.collection(`Chats/${roomId}/messages`).orderBy("createdAt", "desc").where("createdAt", "<", date).limit(1).get()
+    // return !!data.docs.length;
+    return true;
 }
 
 const attachMessageListener = (key: QueryKey): () => void => {
     const roomId = key[1];
-    return db.collection(`Chats/${roomId}/messages`).orderBy("createdAt", "desc").where("createdAt", ">", new Date()).onSnapshot((snap) => {
-        const changes = snap.docChanges()
-        for (const change of changes) {
-            if (change.type === "added") {
-                const data = change.doc.data();
-                const message = { ...data, createdAt: data.createdAt.toDate() } as ChatMessage;
-                addMessageToQueryCache(key, message);
-            }
-        }
-    })
+    return () => {
+        // Receive from websocket and add to query cache
+        // addMessageToQueryCache(key, message);
+    }
 }
 
 const addMessageToQueryCache = (key: QueryKey, message: ChatMessage) => {
