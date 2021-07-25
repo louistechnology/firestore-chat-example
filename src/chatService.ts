@@ -2,7 +2,7 @@ import { InfiniteData, MutationFunction, QueryFunction, QueryKey } from "react-q
 import { queryClient } from "./queryClient";
 
 import { io } from "socket.io-client";
-const socket = io("http://localhost:3000");
+const socket = io("http://localhost:8080");
 
 socket.connect();
 export interface ChatMessage {
@@ -34,11 +34,12 @@ const sendMessage: MutationFunction<any, ChatMessage> = async (message) => {
     console.log(`sendMessage: ${message}`);
     console.log(message);
 
-    // socket.emit('NEW_MESSAGE', {
-    //     sender: message.username,
-    //     roomId: message.roomId,
-    //     content: message.text
-    // })
+    socket.emit('NEW_MESSAGE', {
+        sender: message.username,
+        problemId: message.roomId,
+        text: message.text,
+        createAt: Date.now()
+    })
 
     // allMessages.push(message);
     // This supposed to triggered on receive
@@ -67,8 +68,12 @@ const hasMessageBefore = async (roomId: string, date?: Date) => {
 const attachMessageListener = (key: QueryKey): () => void => {
     const roomId = key[1];
     return () => {
+        console.log(roomId);
+        socket.on("NEW_MESSAGE", (response) => {
+            console.log(response);
+        });
         // Receive from websocket and add to query cache
-        // addMessageToQueryCache(key, message);
+        // addMessageToQueryCache(key, response);
     }
 }
 
