@@ -6,25 +6,24 @@ const socket = io("http://localhost:8080");
 
 socket.connect();
 export interface ChatMessage {
+    sender: number;
+    problemId: number;
     text: string;
-    username: string;
-    roomId: string;
     createdAt?: Date;
-    id?: string;
 }
 
 const PER_PAGE = 20;
 
 let allMessages: ChatMessage[] = [
     {
-        roomId:"1",
-        username:"11",
+        problemId:1,
+        sender:11,
         text:"hello from 11",
         createdAt: new Date()
     },
     {
-        roomId:"1",
-        username:"22",
+        problemId:1,
+        sender:22,
         text:"hello from 22",
         createdAt: new Date()
     }
@@ -35,10 +34,10 @@ const sendMessage: MutationFunction<any, ChatMessage> = async (message) => {
     console.log(message);
 
     socket.emit('NEW_MESSAGE', {
-        sender: message.username,
-        problemId: message.roomId,
+        sender: message.sender,
+        problemId: message.problemId,
         text: message.text,
-        createAt: Date.now()
+        createdAt: Date.now()
     })
 
     // allMessages.push(message);

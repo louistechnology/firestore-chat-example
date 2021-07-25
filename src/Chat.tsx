@@ -23,12 +23,12 @@ export const Chat: React.FC<ChatProps> = ({
     const roomId = chatState.room_id;
     const queryKey = ["messages", roomId];
 
-    const [message, setMessage] = useState("");
+    const [message, setMessage] = useState();
     const [hasNextPage, setHasNextPage] = useState(false);
 
     const sendMutation = useMutation(chatService.sendMessage, {
         onMutate: () => {
-            setMessage("")
+            setMessage()
         },
     });
 
@@ -36,9 +36,10 @@ export const Chat: React.FC<ChatProps> = ({
         e.preventDefault();
         if (message.trim()) {
             sendMutation.mutate({
-                roomId: roomId,
-                text: message,
-                username: chatState.username,
+                sender: message.sender,
+                problemId: message.roomId,
+                text: message.text,
+                createdAt: Date.now()
             })
         }
     }
